@@ -2271,11 +2271,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\asp_net_core_razor_pages_h2\\ContactListWebpage\\ContactListWebpage.csproj",
+      "projectUniqueName": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\ContactListWebpage\\ContactListWebpage.csproj",
       "projectName": "ContactListWebpage",
-      "projectPath": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\asp_net_core_razor_pages_h2\\ContactListWebpage\\ContactListWebpage.csproj",
+      "projectPath": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\ContactListWebpage\\ContactListWebpage.csproj",
       "packagesPath": "C:\\Users\\Jesper\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\asp_net_core_razor_pages_h2\\ContactListWebpage\\obj\\",
+      "outputPath": "C:\\Users\\Jesper\\source\\repos\\asp_net_core_razor_pages_h2\\ContactListWebpage\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
