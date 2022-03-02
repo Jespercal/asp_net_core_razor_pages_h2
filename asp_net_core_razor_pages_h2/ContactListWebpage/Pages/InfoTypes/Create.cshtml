@@ -1,0 +1,33 @@
+﻿@page
+@model InfoTypesCreateModel
+@{
+    ViewData["Title"] = SharedLocalizer["infotypes"] + " - " + SharedLocalizer["button_create"];
+}
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center">
+    <form method="post">
+        <div class="form-group" style="text-align:left;">
+            <div style="display:flex;flex-direction:column;">
+                <div style="display:flex;flex-direction:row;">
+                    @Html.LabelFor(m => m.InfoType.Name, null, new { Class = "form-label text-right", Style="width:100px;"})
+                    @Html.EditorFor(m => m.InfoType.Name, new { htmlAttributes = new { Class = "form-control w-25"}})
+                    @Html.ValidationMessageFor(m => m.InfoType.Name, null, new { Class = "ms-2 text-danger", Style="align-self: center;"})
+                </div>
+                <div class="mt-2" style="display:flex;flex-direction:row;">
+                    @Html.LabelFor(m => m.InfoType.Formatting, null, new { Class = "form-label text-right", Style="width:100px;"})
+                    @Html.EditorFor(m => m.InfoType.Formatting, new { htmlAttributes = new { Class = "form-control w-25", Placeholder="Can be empty"}})
+                </div>
+                <div class="mt-2 mb-2" style="display:flex;flex-direction:row;">
+                    @Html.LabelFor(m => m.InfoType.Example, null, new { Class = "form-label text-right", Style="width:100px;"})
+                    @Html.EditorFor(m => m.InfoType.Example, new { htmlAttributes = new { Class = "form-control w-25", Placeholder="Can be empty"}})
+                </div>
+                <div class="mt-2 mb-2" style="display:flex;flex-direction:row;">
+                    @Html.LabelFor(m => m.InfoType.Link, null, new { Class = "form-label text-right", Style="width:100px;"})
+                    @Html.EditorFor(m => m.InfoType.Link, new { htmlAttributes = new { Class = "form-control w-25", Placeholder="Can be empty"}})
+                </div>
+            </div>
+            <button class="btn btn-success" type="submit">@SharedLocalizer["button_create"]</button>
+        </div>
+    </form>
+</div>

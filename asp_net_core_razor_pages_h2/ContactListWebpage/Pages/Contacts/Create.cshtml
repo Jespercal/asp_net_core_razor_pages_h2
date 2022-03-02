@@ -1,0 +1,38 @@
+﻿@page
+@using ContactListWebpage.Models
+@model ContactsCreateModel
+@{
+    ViewData["Title"] = @SharedLocalizer["contacts"] + " - " + SharedLocalizer["button_create"];
+}
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center">
+    <h2>@SharedLocalizer["create_new_contact"]</h2>
+    <form method="post">
+        <div class="form-group">
+            <div style="display:flex;flex-direction:column;border:1px solid black;padding:10px;margin: 0px auto 10px auto;" class="form-group w-25">
+                @Html.LabelFor(m => m.Contact.Name, null, new { Class = "form-label"})
+                @Html.EditorFor(m => m.Contact.Name, new { htmlAttributes = new { Class = "form-control"}})
+                @Html.ValidationMessageFor(m => m.Contact.Name, null, new { Class = "text-danger"})
+            </div>
+            <h3>@SharedLocalizer["contact_options"]</h3>
+            @Html.ValidationMessage("Overall", new { Class = "text-danger"})
+            <div style="display:flex;flex-direction:row;justify-content: center;">
+                @foreach( ContactInfoTemplate template in Model.Infos )
+                {
+                    <div style="display:flex;flex-direction:column;justify-items:center;border:1px solid black;padding:10px;margin: 0px 5px 10px 5px;position: relative;" class="form-group w-25">
+                        @Html.HiddenFor(m => m.Infos[Model.Infos.IndexOf(template)].InfoType.Formatting)
+                        @Html.HiddenFor(m => m.Infos[Model.Infos.IndexOf(template)].InfoType.Name)
+                        @Html.HiddenFor(m => m.Infos[Model.Infos.IndexOf(template)].InfoType.Link)
+                        @Html.HiddenFor(m => m.Infos[Model.Infos.IndexOf(template)].InfoType.Id)
+                        @Html.DisplayFor(m => m.Infos[Model.Infos.IndexOf(template)].InfoType.Name, null, new { Class = "form-label"})
+                        @Html.EditorFor(m => m.Infos[Model.Infos.IndexOf(template)].Value, new { htmlAttributes = new { Class = "form-control", Placeholder = (template.InfoType.Example ?? "")}})
+                        @Html.EditorFor(m => m.Infos[Model.Infos.IndexOf(template)].IsSelected, new { htmlAttributes = new { Class = "form-check-input isselectedchecker", Style="top:0px;right:4px;position:absolute;"}})
+                        @Html.ValidationMessageFor(m => m.Infos[Model.Infos.IndexOf(template)].Value, null, new { Class = "text-danger"})
+                    </div>
+                }
+            </div>
+            <button class="btn btn-success" type="submit">@SharedLocalizer["button_create"]</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,227 @@
+﻿@page
+@using ContactListWebpage.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+    IOrderedEnumerable<Contact> SortedContacts = Model.Contacts.OrderBy(dat => dat.Name);
+    IOrderedEnumerable<Contact> SortedFavorites = Model.Favorites.OrderBy(dat => dat.Name);
+
+    string sortdata = "";
+
+    if(TempData["sort"] != null && TempData["sort"] != "")
+    {
+        sortdata = ((string)TempData["sort"])??"";
+        if(sortdata == "desc")
+        {
+            SortedContacts = Model.Contacts.OrderByDescending(dat => dat.Name);
+            SortedFavorites = Model.Favorites.OrderByDescending(dat => dat.Name);
+        }
+        else if(sortdata == "created")
+        {
+            SortedContacts = Model.Contacts.OrderBy(dat => dat.CreatedAt);
+            SortedFavorites = Model.Favorites.OrderBy(dat => dat.CreatedAt);
+        }
+        else if(sortdata == "created_desc")
+        {
+            SortedContacts = Model.Contacts.OrderByDescending(dat => dat.CreatedAt);
+            SortedFavorites = Model.Favorites.OrderByDescending(dat => dat.CreatedAt);
+        }
+        else if(sortdata == "updated")
+        {
+            SortedContacts = Model.Contacts.OrderBy(dat => dat.UpdatedAt);
+            SortedFavorites = Model.Favorites.OrderBy(dat => dat.UpdatedAt);
+        }
+        else if(sortdata == "updated_desc")
+        {
+            SortedContacts = Model.Contacts.OrderByDescending(dat => dat.UpdatedAt);
+            SortedFavorites = Model.Favorites.OrderByDescending(dat => dat.UpdatedAt);
+        }
+    }
+}
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center">
+    <h1 class="display-4">@SharedLocalizer["welcome"]</h1>
+    <hr/>
+    <a asp-page="./Contacts/Create"><button class="btn btn-success">@SharedLocalizer["create_new_contact"]</button></a>
+    <div style="display:flex;flex-direction:column;">
+        <div style="align-items: center;display:flex;flex-direction:column;justify-content: center;border-bottom:1px solid gray;">
+            <div style="display:flex;flex-direction:row;justify-content: center;font-size:22px;">
+                <div style="display:flex;flex-direction:row;font-weight:bold;">
+                    <div style="width:50px;text-align:left;color:gold;">
+                    </div>
+                    <div style="width:250px;text-align:left;">
+                        @if(sortdata == "")
+                        {
+                            <a href="/Index?sort=desc">↓@SharedLocalizer["generic_name"]</a>
+                        }
+                        else if(sortdata == "desc" )
+                        {
+                            <a href="/Index">↑@SharedLocalizer["generic_name"]</a>
+                        }
+                        else
+                        {
+                            <a href="/Index">@SharedLocalizer["generic_name"]</a>
+                        }
+                    </div>
+                    <div style="width:240px;text-align:left;">
+                        @if(sortdata == "created")
+                        {
+                            <a href="/Index?sort=created_desc">↑@SharedLocalizer["generic_createdat"]</a>
+                        }
+                        else if(sortdata == "created_desc" )
+                        {
+                            <a href="/Index?sort=created">↓@SharedLocalizer["generic_createdat"]</a>
+                        }
+                        else
+                        {
+                            <a href="/Index?sort=created_desc">@SharedLocalizer["generic_createdat"]</a>
+                        }
+                    </div>
+                    <div style="width:240px;text-align:left;">
+                        @if(sortdata == "updated")
+                        {
+                            <a href="/Index?sort=updated_desc">↑@SharedLocalizer["generic_updatedat"]</a>
+                        }
+                        else if(sortdata == "updated_desc" )
+                        {
+                            <a href="/Index?sort=updated">↓@SharedLocalizer["generic_updatedat"]</a>
+                        }
+                        else
+                        {
+                            <a href="/Index?sort=updated_desc">@SharedLocalizer["generic_updatedat"]</a>
+                        }
+                    </div>
+                </div>
+                <div style="width:80px;text-align:left;">
+                </div>
+                <div style="width:50px;text-align:left;">
+                </div>
+            </div>
+        </div>
+        @if(Model.Favorites.Count > 0)
+        {
+            @foreach(Contact contact in SortedFavorites)
+            {
+                <div class="border-bottom border-light" style="align-items: center;display:flex;flex-direction:column;justify-content: center;">
+                    <div style="display:flex;flex-direction:row;justify-content: center;font-size:22px;">
+                        <div style="width:50px;text-align:left;color:gold;">
+                            <form id="favorite-form-@contact.Id" asp-page="./Favorites/Delete" method="post">
+                                <input type="hidden" name="contactId" value="@contact.Id" />
+                                <span onclick="$('#favorite-form-@(contact.Id)').submit();" type="submit">✭</span>
+                            </form>
+                        </div>
+                        <div style="display:flex;flex-direction:row;" type="button" data-bs-toggle="collapse" data-bs-target="#contact_@(contact.Id)" aria-expanded="false" aria-controls="collapseExample">
+                            <div style="width:250px;text-align:left;">
+                                @contact.Name
+                            </div>
+                            <div style="width:240px;text-align:left;">
+                                @contact.CreatedAt
+                            </div>
+                            <div style="width:240px;text-align:left;">
+                                @contact.UpdatedAt
+                            </div>
+                            <div class="collapse-displayer" style="width:50px;text-align:left;">
+                                +
+                            </div>
+                        </div>
+                        <div style="width:80px;text-align:left;">
+                            <a asp-page="/Contacts/Edit" asp-route-id="@contact.Id"><button class="btn btn-primary">@SharedLocalizer["button_edit"]</button></a>
+                        </div>
+                    </div>
+                    <div class="collapse mb-3" id="contact_@(contact.Id)" style="width:805px;">
+                        @foreach(ContactInfo info in contact.Infos)
+                        {
+                            <div style="display:flex;flex-direction:row;justify-content: left;">
+                                <div style="width:100px;text-align:left;font-weight:bold;display: flex;justify-content: space-between;">
+                                    <div>@info.InfoType.Name</div>
+                                    <div class="pe-1">:</div>
+                                </div>
+                                <div style="width:200px;text-align:left;">
+                                    @if(info.InfoType.Link != null && info.InfoType.Link != "")
+                                    {
+                                        <a target="_blank" href="@(String.Format(info.InfoType.Link,info.Value))">@info.Value</a>
+                                    }
+                                    else
+                                    {
+                                        @info.Value
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        @foreach(Contact contact in SortedContacts)
+        {
+            <div class="border-bottom border-light" style="align-items: center;display:flex;flex-direction:column;justify-content: center;">
+                <div style="display:flex;flex-direction:row;justify-content: center;font-size:22px;">
+                    <div style="width:50px;text-align:left;color:lightgray;">
+                        <form id="favorite-form-@contact.Id" asp-page="./Favorites/Create" method="post">
+                            <input type="hidden" name="contactId" value="@contact.Id" />
+                            <span onclick="$('#favorite-form-@(contact.Id)').submit();" type="submit">✭</span>
+                        </form>
+                    </div>
+                    <div style="display:flex;flex-direction:row;" type="button" data-bs-toggle="collapse" data-bs-target="#contact_@(contact.Id)" aria-expanded="false" aria-controls="collapseExample">
+                        <div style="width:250px;text-align:left;">
+                            @contact.Name
+                        </div>
+                        <div style="width:240px;text-align:left;">
+                            @contact.CreatedAt
+                        </div>
+                        <div style="width:240px;text-align:left;">
+                            @contact.UpdatedAt
+                        </div>
+                        <div class="collapse-displayer" style="width:50px;text-align:left;">
+                            +
+                        </div>
+                    </div>
+                    <div style="width:80px;text-align:left;">
+                        <a asp-page="/Contacts/Edit" asp-route-id="@contact.Id"><button class="btn btn-primary">@SharedLocalizer["button_edit"]</button></a>
+                    </div>
+                </div>
+                <div class="collapse mb-3" id="contact_@(contact.Id)" style="width:805px;">
+                    @foreach(ContactInfo info in contact.Infos)
+                    {
+                        <div style="display:flex;flex-direction:row;justify-content: left;">
+                            <div style="width:100px;text-align:left;font-weight:bold;display: flex;justify-content: space-between;">
+                                <div>@info.InfoType.Name</div>
+                                <div class="pe-1">:</div>
+                            </div>
+                            <div style="width:200px;text-align:left;">
+                                @if(info.InfoType.Link != null && info.InfoType.Link != "")
+                                {
+                                    <a target="_blank" href="@(String.Format(info.InfoType.Link,info.Value))">@info.Value</a>
+                                }
+                                else
+                                {
+                                    @info.Value
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@section Scripts
+{
+    <script>
+        $(".collapse").on("show.bs.collapse", function()
+        {
+            let elem = $(this);
+            elem.parent().find(".collapse-displayer").text("-")
+        })
+        $(".collapse").on("hide.bs.collapse", function()
+        {
+            let elem = $(this);
+            elem.parent().find(".collapse-displayer").text("+")
+        })
+    </script>
+}

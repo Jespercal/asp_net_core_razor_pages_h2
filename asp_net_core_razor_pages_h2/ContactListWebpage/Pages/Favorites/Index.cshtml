@@ -1,0 +1,53 @@
+﻿@page "{infotype?}"
+@using ContactListWebpage.Models
+@model FavoritesIndexModel
+@{
+    ViewData["Title"] = "Favorites";
+}
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center">
+    <h1 class="display-4">@SharedLocalizer["favorites"]</h1>
+    <hr/>
+    <form id="infotype_form" method="post">
+        <select onchange="location.href=($(this).val());">
+            @foreach(InfoType infoType in Model.InfoTypes)
+            {
+                string text = infoType.Id == Model.ShowInfoType ? " selected" : "";
+                @:<option @text value="/Favorites?infotype=@infoType.Id">@infoType.Name</option>
+            }
+        </select>
+    </form>
+    <div style="display:flex;flex-direction:column;align-items: center;">
+        <div style="display:flex;flex-direction:row;justify-content: center;font-size:24px;width:min-content;border-bottom:1px solid lightgray;">
+            <div style="width:400px;text-align:left;font-weight:bold;">
+                @SharedLocalizer["generic_name"]
+            </div>
+            <div style="width:400px;text-align:left;font-weight:bold;">
+                @SharedLocalizer["generic_value"]
+            </div>
+        </div>
+    </div>
+    <div style="display:flex;flex-direction:column;">
+        @if(Model.Favorites.Count > 0)
+        {
+            @foreach(Contact contact in (Model.Favorites.Where(dat => dat.Infos.Count(dat2 => dat2.InfoTypeId == Model.ShowInfoType) > 0).ToList()))
+            {
+                <div class="border-bottom border-light" style="display:flex;flex-direction:row;justify-content: center;font-size:24px;">
+                    <div style="width:400px;text-align:left;">
+                        @contact.Name
+                    </div>
+                    <div style="width:400px;text-align:left;">
+                        @{
+                            ContactInfo? info = contact.Infos.Find(dat => dat.InfoType.Id == Model.ShowInfoType);
+                            if(info != null)
+                            {
+                                @:@(info.Value)
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

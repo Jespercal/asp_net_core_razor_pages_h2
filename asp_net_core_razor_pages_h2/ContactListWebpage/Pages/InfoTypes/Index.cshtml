@@ -1,0 +1,42 @@
+﻿@page
+@using ContactListWebpage.Models
+@model InfoTypesIndexModel
+@{
+    ViewData["Title"] = "InfoTypes - List";
+}
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center mt-5">
+    <div>
+        <h4>@SharedLocalizer["infotypes"]</h4>
+        <a asp-page="./Create"><button class="btn btn-sm btn-success">@SharedLocalizer["add_new_infotype"]</button></a>
+    </div>
+    <div style="display:flex;flex-direction:row;justify-content: center;">
+        <div class="m-1 px-3 py-3" style="display:flex;flex-direction:column;border:1px solid lightgray;">
+            <div style="display:flex;flex-direction:row;align-items: center;font-weight:bold;">
+                <div style="min-width:50px;text-align:left;">@SharedLocalizer["generic_id"]</div>
+                <div style="min-width:150px;text-align:left;">@SharedLocalizer["generic_name"]</div>
+                <div style="min-width:150px;text-align:left;">@SharedLocalizer["generic_formatting"]</div>
+                <div style="min-width:150px;text-align:left;">@SharedLocalizer["generic_example"]</div>
+                <div style="min-width:300px;text-align:left;">Link</div>
+            </div>
+            <hr class="mt-0 mb-2 px-0"/>
+            @foreach( InfoType infoType in Model.InfoTypes )
+            {
+            <div style="display:flex;flex-direction:row;align-items: center;" class="py-1">
+                <div style="min-width:50px;text-align:left;">@infoType.Id</div>
+                <div style="min-width:150px;text-align:left;">@infoType.Name</div>
+                <div style="min-width:150px;text-align:left;">@infoType.Formatting</div>
+                <div style="min-width:150px;text-align:left;">@infoType.Example</div>
+                <div style="min-width:300px;text-align:left;">@infoType.Link</div>
+                <div style="width:auto;text-align:left;" class="pe-1">
+                    <a asp-page="./Edit" asp-route-id="@infoType.Id"><button class="btn btn-sm btn-primary">@SharedLocalizer["button_edit"]</button></a>
+                </div>
+                <div style="width:auto;text-align:left;">
+                    <form method="post" asp-page="./Delete"><input name="id" type="hidden" value="@infoType.Id" /><button class="btn btn-sm btn-danger" type="submit">@SharedLocalizer["button_delete"]</button></form>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>

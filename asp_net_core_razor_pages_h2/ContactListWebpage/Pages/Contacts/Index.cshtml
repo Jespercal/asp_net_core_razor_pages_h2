@@ -1,0 +1,40 @@
+﻿@page
+@using ContactListWebpage.Models
+@model ContactsIndexModel
+@{
+    ViewData["Title"] = "Contacts - List";
+}
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> SharedLocalizer
+
+<div class="text-center mt-5">
+    <div>
+        <h4>@SharedLocalizer["contacts"]</h4>
+        <a asp-page="./Create"><button class="btn btn-success">@SharedLocalizer["add_new_contact"]</button></a>
+    </div>
+    <div style="display:flex;flex-direction:row;justify-content: center;">
+        <div class="m-1 px-3 py-3" style="display:flex;flex-direction:column;border:1px solid lightgray;">
+            <div style="display:flex;flex-direction:row;align-items: center;font-weight:bold;">
+                <div style="min-width:50px;text-align:left;">@SharedLocalizer["generic_id"]</div>
+                <div style="min-width:150px;text-align:left;">@SharedLocalizer["generic_name"]</div>
+                <div style="min-width:180px;text-align:left;">@SharedLocalizer["generic_createdat"]</div>
+                <div style="min-width:180px;text-align:left;">@SharedLocalizer["generic_updatedat"]</div>
+            </div>
+            <hr class="mt-0 mb-2 px-0"/>
+            @foreach( Contact contact in Model.Contacts )
+            {
+                <div style="display:flex;flex-direction:row;align-items: center;" class="py-1">
+                    <div style="min-width:50px;text-align:left;">@contact.Id</div>
+                    <div style="min-width:150px;text-align:left;">@contact.Name</div>
+                    <div style="min-width:180px;text-align:left;">@contact.CreatedAt</div>
+                    <div style="min-width:180px;text-align:left;">@contact.UpdatedAt</div>
+                    <div style="width:auto;text-align:left;" class="pe-1">
+                        <a asp-page="./Edit" asp-route-id="@contact.Id"><button class="btn btn-primary">@SharedLocalizer["button_edit"]</button></a>
+                    </div>
+                    <div style="width:auto;text-align:left;">
+                        <form method="post" asp-page="./Delete"><input name="id" type="hidden" value="@contact.Id" /><button class="btn btn-danger" type="submit">@SharedLocalizer["button_delete"]</button></form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
