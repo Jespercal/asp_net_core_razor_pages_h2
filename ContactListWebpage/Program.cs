@@ -18,7 +18,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton<IDataHandler>(sp => DataHandler.GetInstance());
+builder.Services.AddSingleton<IDataHandler>(sp => DataHandlerDB.GetInstance());
 builder.Services.AddScoped<IMyRepository, MyRepository>();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
