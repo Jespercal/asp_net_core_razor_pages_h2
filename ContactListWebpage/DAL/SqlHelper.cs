@@ -15,7 +15,16 @@ namespace ContactListWebpage.DAL
                     cmd.Parameters.AddRange(parameters);
 
                     conn.Open();
-                    return cmd.ExecuteNonQuery();
+                    int result;
+                    try
+                    {
+                        result = cmd.ExecuteNonQuery();
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                    return result;
                 }
             }
         }
@@ -29,7 +38,16 @@ namespace ContactListWebpage.DAL
                     cmd.CommandText = commandText;
 
                     conn.Open();
-                    return cmd.ExecuteNonQuery();
+                    int result;
+                    try
+                    {
+                        result = cmd.ExecuteNonQuery();
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                    return result;
                 }
             }
         }
@@ -44,12 +62,21 @@ namespace ContactListWebpage.DAL
                     cmd.Parameters.AddRange(parameters);
 
                     conn.Open();
-                    return cmd.ExecuteScalar();
+                    object result;
+                    try
+                    {
+                        result = cmd.ExecuteScalar();
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                    return result;
                 }
             }
         }
 
-        public static SqlDataReader ExecuteReader(String connectionString, String commandText, CommandType commandType, params SqlParameter[] parameters)
+        public static void ExecuteReader(String connectionString, String commandText, CommandType commandType, Action<SqlDataReader> runafter, params SqlParameter[] parameters )
         {
             SqlConnection conn = new SqlConnection(connectionString);
 
@@ -59,9 +86,16 @@ namespace ContactListWebpage.DAL
                 cmd.Parameters.AddRange(parameters);
 
                 conn.Open();
-                SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                return reader;
+                SqlDataReader reader;
+                try
+                {
+                    reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    runafter(reader);
+                }
+                finally
+                {
+                    if(conn.State != ConnectionState.Closed) conn.Close();
+                }
             }
         }
     }

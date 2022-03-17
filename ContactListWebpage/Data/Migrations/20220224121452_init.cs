@@ -42,7 +42,7 @@ namespace ContactListWebpage.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UserId = table.Column<string>(maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {

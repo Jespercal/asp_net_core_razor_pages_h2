@@ -24,7 +24,7 @@ namespace ContactListWebpage.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -63,7 +63,7 @@ namespace ContactListWebpage.Data.Migrations
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
@@ -75,7 +75,7 @@ namespace ContactListWebpage.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -152,7 +152,7 @@ namespace ContactListWebpage.Data.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
@@ -176,7 +176,7 @@ namespace ContactListWebpage.Data.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -188,10 +188,10 @@ namespace ContactListWebpage.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -203,7 +203,7 @@ namespace ContactListWebpage.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(128)")

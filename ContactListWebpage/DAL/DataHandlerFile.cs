@@ -4,17 +4,17 @@ using System.Xml.Serialization;
 
 namespace ContactListWebpage.DAL
 {
-    public class DataHandler : IDataHandler
+    public class DataHandlerFile : IDataHandler
     {
-        private static readonly DataHandler _dataHandlerInstance = new DataHandler();
+        private static readonly DataHandlerFile _dataHandlerInstance = new DataHandlerFile();
         public List<Contact> Contacts { get; set; }
         public List<InfoType> InfoTypes { get; set; }
         public List<FavoriteContact> FavoriteContacts { get; set; }
         public List<ContactInfo> _contactInfos { get; set; }
-        public static DataHandler GetInstance() => _dataHandlerInstance;
-        public static DataHandler Instance => _dataHandlerInstance;
+        public static DataHandlerFile GetInstance() => _dataHandlerInstance;
+        public static DataHandlerFile Instance => _dataHandlerInstance;
 
-        private DataHandler()
+        private DataHandlerFile()
         {
             Contacts = new List<Contact>();
             InfoTypes = new List<InfoType>();
@@ -106,10 +106,6 @@ namespace ContactListWebpage.DAL
         }
 
         #region CRUD for Contacts
-        public Contact CreateContact(string name, List<ContactInfo> infos)
-        {
-            throw new NotImplementedException();
-        }
         public Contact CreateContact(Contact contact)
         {
             contact.Id = (Contacts.Count > 0 ? Contacts.Max(dat => dat.Id) : 0) + 1;
@@ -153,10 +149,6 @@ namespace ContactListWebpage.DAL
         #endregion
 
         #region CRUD for InfoTypes
-        public InfoType CreateInfoType(string name)
-        {
-            throw new NotImplementedException();
-        }
         public InfoType CreateInfoType(InfoType infoType)
         {
             infoType.Id = (InfoTypes.Count > 0 ? InfoTypes.Max(dat => dat.Id) : 0) + 1;

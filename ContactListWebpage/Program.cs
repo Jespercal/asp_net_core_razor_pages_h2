@@ -18,6 +18,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+
 builder.Services.AddSingleton<IDataHandler>(sp => DataHandlerDB.GetInstance());
 builder.Services.AddScoped<IMyRepository, MyRepository>();
 
@@ -25,11 +26,11 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    var supportedCultures = new List<CultureInfo>
-                    {
-                        new CultureInfo("en-US"),
-                        new CultureInfo("da-DK")
-                    };
+    List<CultureInfo> supportedCultures = new List<CultureInfo>
+    {
+        new CultureInfo("en-US"),
+        new CultureInfo("da-DK")
+    };
 
     options.DefaultRequestCulture = new RequestCulture("da-DK");
     options.SupportedCultures = supportedCultures;
@@ -55,7 +56,7 @@ else
 
 app.UseHttpsRedirection();
 
-var supportedCultures = new[]
+CultureInfo[] supportedCultures = new[]
 {
     new CultureInfo("en-US"),
     new CultureInfo("da-DK"),
@@ -64,9 +65,7 @@ var supportedCultures = new[]
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture("da-DK"),
-    // Formatting numbers, dates, etc.
     SupportedCultures = supportedCultures,
-    // UI strings that we have localized.
     SupportedUICultures = supportedCultures
 });
 

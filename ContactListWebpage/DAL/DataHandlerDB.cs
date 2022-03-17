@@ -16,10 +16,13 @@ namespace ContactListWebpage.DAL
         public static DataHandlerDB GetInstance() => _dataHandlerInstance;
         public static DataHandlerDB Instance => _dataHandlerInstance;
         private bool _isSetup;
-        private string connectionString = "Server=(localdb)\\mssqllocaldb;Database=aspnet-ContactListWebpage-53bc9b9d-9d6a-45d4-8429-2a2761773502;Trusted_Connection=True;MultipleActiveResultSets=true";
+        private string connectionString = "";
+
+        public Queue<SPBuilder> RunSPOnSave { get; set; } = new Queue<SPBuilder>();
 
         private DataHandlerDB()
         {
+            connectionString = WebApplication.CreateBuilder().Configuration.GetConnectionString("DefaultConnection");
             Contacts = new List<Contact>();
             InfoTypes = new List<InfoType>();
             _contactInfos = new List<ContactInfo>();
@@ -27,35 +30,17 @@ namespace ContactListWebpage.DAL
             Load();
         }
 
+        public void RunOnSave( SPBuilder builder )
+        {
+            RunSPOnSave.Enqueue(builder);
+            //builder.Execute();
+        }
+
         public void Save()
         {
-            return;
-            XmlSerializer serializer2 = new XmlSerializer(typeof(List<Contact>));
-            using (Stream writer2 = new FileStream("contacts.xml", FileMode.Create))
+            while(RunSPOnSave.Count > 0)
             {
-                serializer2.Serialize(writer2, Contacts);
-            }
-            XmlSerializer serializer3 = new XmlSerializer(typeof(List<InfoType>));
-            using (Stream writer3 = new FileStream("infotypes.xml", FileMode.Create))
-            {
-                serializer3.Serialize(writer3, InfoTypes);
-            }
-
-            _contactInfos.Clear();
-            foreach (Contact contact in Contacts)
-            {
-                _contactInfos.AddRange(contact.Infos);
-            }
-            XmlSerializer serializer4 = new XmlSerializer(typeof(List<ContactInfo>));
-            using (Stream writer4 = new FileStream("contactInfos.xml", FileMode.Create))
-            {
-                serializer4.Serialize(writer4, _contactInfos);
-            }
-
-            XmlSerializer serializer5 = new XmlSerializer(typeof(List<FavoriteContact>));
-            using (Stream writer5 = new FileStream("favorites.xml", FileMode.Create))
-            {
-                serializer5.Serialize(writer5, FavoriteContacts);
+                RunSPOnSave.Dequeue().Execute();
             }
         }
 
@@ -64,54 +49,60 @@ namespace ContactListWebpage.DAL
             if (!_isSetup) Setup();
 
             {
-                SqlDataReader reader = SqlHelper.ExecuteReader(connectionString, "ListContacts", System.Data.CommandType.StoredProcedure, new SqlParameter[] { });
                 Contacts = new List<Contact>();
-                while (reader.Read())
+                SqlHelper.ExecuteReader(connectionString, "ListContacts", System.Data.CommandType.StoredProcedure, (reader) =>
                 {
-                    Contact contact = new Contact()
+                    while (reader.Read())
                     {
-                        Id = (int)(Int64)reader[0],
-                        Name = (string)reader[1],
-                        CreatedAt = (DateTime)reader[2]
-                    };
-                    if (reader[3].GetType() != typeof(DBNull))
-                    {
-                        contact.UpdatedAt = (DateTime)reader[3];
+                        Contact contact = new Contact()
+                        {
+                            Id = (int)(Int64)reader[0],
+                            Name = (string)reader[1],
+                            CreatedAt = (DateTime)reader[2]
+                        };
+                        if (reader[3].GetType() != typeof(DBNull))
+                        {
+                            contact.UpdatedAt = (DateTime)reader[3];
+                        }
+                        Contacts.Add(contact);
                     }
-                    Contacts.Add(contact);
-                }
+                }, new SqlParameter[] { });
             }
 
             {
-                SqlDataReader reader = SqlHelper.ExecuteReader(connectionString, "ListInfoTypes", System.Data.CommandType.StoredProcedure, new SqlParameter[] { });
                 InfoTypes = new List<InfoType>();
-                while (reader.Read())
+                SqlHelper.ExecuteReader(connectionString, "ListInfoTypes", System.Data.CommandType.StoredProcedure, (reader) =>
                 {
-                    InfoType infotype = new InfoType()
+                    while (reader.Read())
                     {
-                        Id = (int)(Int64)reader[0],
-                        Name = (string)reader[1],
-                        Formatting = reader[2].GetType() != typeof(DBNull) ? (string)reader[2] : null,
-                        Example = reader[3].GetType() != typeof(DBNull) ? (string)reader[3] : null,
-                        Link = reader[4].GetType() != typeof(DBNull) ? (string)reader[4] : null
-                    };
-                    InfoTypes.Add(infotype);
-                }
+                        InfoType infotype = new InfoType()
+                        {
+                            Id = (int)(Int64)reader[0],
+                            Name = (string)reader[1],
+                            Formatting = reader[2].GetType() != typeof(DBNull) ? (string)reader[2] : null,
+                            Example = reader[3].GetType() != typeof(DBNull) ? (string)reader[3] : null,
+                            Link = reader[4].GetType() != typeof(DBNull) ? (string)reader[4] : null
+                        };
+                        InfoTypes.Add(infotype);
+                    }
+                }, new SqlParameter[] { });
             }
 
             {
-                SqlDataReader reader = SqlHelper.ExecuteReader(connectionString, "ListContactInfos", System.Data.CommandType.StoredProcedure, new SqlParameter[] { });
                 _contactInfos = new List<ContactInfo>();
-                while (reader.Read())
+                SqlHelper.ExecuteReader(connectionString, "ListContactInfos", System.Data.CommandType.StoredProcedure, (reader) =>
                 {
-                    ContactInfo contactinfo = new ContactInfo()
+                    while (reader.Read())
                     {
-                        ContactId = (int)(Int64)reader[0],
-                        InfoTypeId = (int)(Int64)reader[1],
-                        Value = (string)reader[2]
-                    };
-                    _contactInfos.Add(contactinfo);
-                }
+                        ContactInfo contactinfo = new ContactInfo()
+                        {
+                            ContactId = (int)(Int64)reader[0],
+                            InfoTypeId = (int)(Int64)reader[1],
+                            Value = (string)reader[2]
+                        };
+                        _contactInfos.Add(contactinfo);
+                    }
+                }, new SqlParameter[] { });
             }
             for (int index = 0; index < _contactInfos.Count; index++)
             {
@@ -124,17 +115,19 @@ namespace ContactListWebpage.DAL
             }
 
             {
-                SqlDataReader reader = SqlHelper.ExecuteReader(connectionString, "ListFavorites", System.Data.CommandType.StoredProcedure, new SqlParameter[] { });
                 FavoriteContacts = new List<FavoriteContact>();
-                while (reader.Read())
+                SqlHelper.ExecuteReader(connectionString, "ListFavorites", System.Data.CommandType.StoredProcedure, (reader) =>
                 {
-                    FavoriteContact favorite = new FavoriteContact()
+                    while (reader.Read())
                     {
-                        UserSid = (string)reader[0],
-                        ContactId = (int)(Int64)reader[1],
-                    };
-                    FavoriteContacts.Add(favorite);
-                }
+                        FavoriteContact favorite = new FavoriteContact()
+                        {
+                            UserSid = (string)reader[0],
+                            ContactId = (int)(Int64)reader[1],
+                        };
+                        FavoriteContacts.Add(favorite);
+                    }
+                }, new SqlParameter[] { });
                 for (int index = 0; index < FavoriteContacts.Count; index++)
                 {
                     FavoriteContacts[index].Contact = Contacts.Count(dat => dat.Id == FavoriteContacts[index].ContactId) > 0 ? Contacts.Find(dat => dat.Id == FavoriteContacts[index].ContactId) : null;
@@ -152,12 +145,12 @@ namespace ContactListWebpage.DAL
 
             SqlHelper.CreateCommand(connectionString, @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].FavoriteContacts') AND type in (N'U'))
                                                         BEGIN
-                                                            CREATE TABLE FavoriteContacts(UserSid nvarchar(450) NOT NULL UNIQUE FOREIGN KEY REFERENCES AspNetUsers(Id), ContactId bigint NOT NULL UNIQUE FOREIGN KEY REFERENCES Contacts(Id), PRIMARY KEY (UserSid,ContactId));
+                                                            CREATE TABLE FavoriteContacts(UserSid nvarchar(256) NOT NULL FOREIGN KEY REFERENCES AspNetUsers(Id), ContactId bigint NOT NULL FOREIGN KEY REFERENCES Contacts(Id), PRIMARY KEY (UserSid,ContactId));
                                                         END;");
 
             SqlHelper.CreateCommand(connectionString, @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].ContactInfos') AND type in (N'U'))
                                                         BEGIN
-                                                            CREATE TABLE ContactInfos(ContactId bigint NOT NULL UNIQUE FOREIGN KEY REFERENCES Contacts(Id), InfoTypeId bigint NOT NULL UNIQUE, Value varchar(200) NOT NULL, CreatedAt datetime NOT NULL DEFAULT GETDATE(), PRIMARY KEY (ContactId,InfoTypeId));
+                                                            CREATE TABLE ContactInfos(ContactId bigint NOT NULL FOREIGN KEY REFERENCES Contacts(Id), InfoTypeId bigint NOT NULL, Value varchar(200) NOT NULL, CreatedAt datetime NOT NULL DEFAULT GETDATE(), PRIMARY KEY (ContactId,InfoTypeId));
                                                         END;");
 
             SqlHelper.CreateCommand(connectionString, @"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].InfoTypes') AND type in (N'U'))
@@ -347,16 +340,12 @@ namespace ContactListWebpage.DAL
 
 
         #region CRUD for Contacts
-        public Contact CreateContact(string name, List<ContactInfo> infos)
-        {
-            throw new NotImplementedException();
-        }
         public Contact CreateContact(Contact contact)
         {
             contact.Id = (Contacts.Count > 0 ? Contacts.Max(dat => dat.Id) : 0) + 1;
             Contacts.Add(contact);
 
-            SqlHelper.ExecuteNonQuery(connectionString, "CreateContact", CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@Id", contact.Id), new SqlParameter("@Name", contact.Name) });
+            RunOnSave(new SPBuilder("CreateContact").Add("Id", contact.Id).Add("Name",contact.Name));
 
             return contact;
         }
@@ -366,7 +355,7 @@ namespace ContactListWebpage.DAL
             if (Contacts.Count(dat => dat.Id == id) > 0)
             {
                 Contacts.RemoveAll(dat => dat.Id == id);
-                SqlHelper.ExecuteNonQuery(connectionString, "DeleteContact", CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@Id", id) });
+                RunOnSave(new SPBuilder("DeleteContact").Add("Id",id));
                 return true;
             }
             return false;
@@ -377,11 +366,11 @@ namespace ContactListWebpage.DAL
             Contacts[index] = contact;
             Contacts[index].UpdatedAt = DateTime.UtcNow;
 
-            new SPBuilder("UpdateContact").Add("Id", id).Add("Name",contact.Name).Execute();
-            new SPBuilder("DeleteContactInfos").Add("ContactId", id).Execute();
+            RunOnSave(new SPBuilder("UpdateContact").Add("Id", id).Add("Name",contact.Name));//.Execute();
+            RunOnSave(new SPBuilder("DeleteContactInfos").Add("ContactId", id));//.Execute();
             Contacts[index].Infos.ForEach(info =>
             {
-                new SPBuilder("UpsertContactInfo").Add("ContactId", id).Add("InfoTypeId", info.InfoType.Id).Add("Value", info.Value).Execute();
+                RunOnSave(new SPBuilder("UpsertContactInfo").Add("ContactId", id).Add("InfoTypeId", info.InfoType.Id).Add("Value", info.Value));//.Execute();
             });
 
             return Contacts[index];
@@ -406,22 +395,18 @@ namespace ContactListWebpage.DAL
         #endregion
 
         #region CRUD for InfoTypes
-        public InfoType CreateInfoType(string name)
-        {
-            throw new NotImplementedException();
-        }
         public InfoType CreateInfoType(InfoType infoType)
         {
             infoType.Id = (InfoTypes.Count > 0 ? InfoTypes.Max(dat => dat.Id) : 0) + 1;
             InfoTypes.Add(infoType);
 
-            new SPBuilder("UpsertInfoType")
+            RunOnSave(new SPBuilder("UpsertInfoType")
                 .Add("Id", infoType.Id)
                 .Add("Name", infoType.Name)
                 .Add("Formatting", infoType.Formatting != null ? infoType.Formatting : DBNull.Value)
                 .Add("Example", infoType.Example != null ? infoType.Example : DBNull.Value)
-                .Add("Link", infoType.Link != null ? infoType.Link : DBNull.Value)
-                .Execute();
+                .Add("Link", infoType.Link != null ? infoType.Link : DBNull.Value));
+                //.Execute();
 
             return infoType;
         }
@@ -432,7 +417,7 @@ namespace ContactListWebpage.DAL
             {
                 InfoTypes.RemoveAll(dat => dat.Id == id);
 
-                new SPBuilder("DeleteInfoType").Add("Id", id).Execute();
+                RunOnSave(new SPBuilder("DeleteInfoType").Add("Id", id));//.Execute();
 
                 return true;
             }
@@ -443,13 +428,13 @@ namespace ContactListWebpage.DAL
             int index = InfoTypes.FindIndex(dat => dat.Id == id);
             InfoTypes[index] = infoType;
 
-            new SPBuilder("UpsertInfoType")
+            RunOnSave(new SPBuilder("UpsertInfoType")
                 .Add("Id", id)
                 .Add("Name", infoType.Name)
                 .Add("Formatting", infoType.Formatting != null ? infoType.Formatting : DBNull.Value)
                 .Add("Example", infoType.Example != null ? infoType.Example : DBNull.Value)
-                .Add("Link", infoType.Link != null ? infoType.Link : DBNull.Value)
-                .Execute();
+                .Add("Link", infoType.Link != null ? infoType.Link : DBNull.Value));
+                //.Execute();
 
             return InfoTypes[index];
         }
@@ -476,10 +461,10 @@ namespace ContactListWebpage.DAL
             FavoriteContact favorite = new FavoriteContact() { UserSid = user.Id, Contact = contact };
             FavoriteContacts.Add(favorite);
 
-            new SPBuilder("CreateFavorite")
+            RunOnSave(new SPBuilder("CreateFavorite")
                 .Add("UserSid", favorite.UserSid)
-                .Add("ContactId", favorite.ContactId.Value)
-                .Execute();
+                .Add("ContactId", favorite.ContactId.Value));
+                //.Execute();
 
             return favorite;
         }
@@ -492,10 +477,10 @@ namespace ContactListWebpage.DAL
             FavoriteContact favorite = new FavoriteContact() { UserSid = user.Id, Contact = contact };
             FavoriteContacts.Add(favorite);
 
-            new SPBuilder("CreateFavorite")
+            RunOnSave(new SPBuilder("CreateFavorite")
                 .Add("UserSid", favorite.UserSid)
-                .Add("ContactId", contactId)
-                .Execute();
+                .Add("ContactId", contactId));
+                //.Execute();
 
             return favorite;
         }
@@ -507,7 +492,7 @@ namespace ContactListWebpage.DAL
             {
                 FavoriteContacts.Remove(FavoriteContacts.Find(dat => dat.UserSid == user.Id && dat.Contact.Id == contact.Id));
 
-                new SPBuilder("DeleteFavorite").Add("UserSid", user.Id).Add("ContactId", contact.Id).Execute();
+                RunOnSave(new SPBuilder("DeleteFavorite").Add("UserSid", user.Id).Add("ContactId", contact.Id));//.Execute();
 
                 return true;
             }
@@ -522,7 +507,7 @@ namespace ContactListWebpage.DAL
             {
                 FavoriteContacts.Remove(FavoriteContacts.Find(dat => dat.UserSid == user.Id && dat.Contact.Id == contact.Id));
 
-                new SPBuilder("DeleteFavorite").Add("UserSid", user.Id).Add("ContactId", contactId).Execute();
+                RunOnSave(new SPBuilder("DeleteFavorite").Add("UserSid", user.Id).Add("ContactId", contactId));//.Execute();
 
                 return true;
             }
